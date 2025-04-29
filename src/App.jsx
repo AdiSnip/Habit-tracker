@@ -16,14 +16,32 @@ const App = () => {
   const hasFetched = useRef(false);
   const [userdata, setUserdata] = useState() // prevent double fetch in dev
   
-
+  useEffect(() => {
+    if (!hasFetched.current) {
+      axios.get('/api/user')
+        .then((response) => {
+          if (!response.data || Object.keys(response.data).length === 0) {
+            navigate('/login'); // Navigate if no user data
+          } else {
+            setUserdata(response.data); // Only set user if data exists
+            hasFetched.current = true;
+            console.log('User data fetched:', response.data);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching user data:', error);
+          navigate('/login'); // Navigate on error (like 401 unauthorized)
+        });
+    }
+  }, []);
+  
   
 
   return (
     <div>
       <UserContext.Provider value={{userdata}}>
       <Navbar />
-      <div className="flex flex-col pl-[5%]">
+      <div className="flex flex-col md:pl-[5%]">
         <Accnav />
         <Routes>
           <Route path="/" element={<Container />} />

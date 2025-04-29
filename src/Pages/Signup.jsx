@@ -9,7 +9,7 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center absolute w-full h-full left-0 top-0 z-1000 bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
-        <form method='post' action='/api/signup'>
+        <form method='post' action='/api/register'>
           <div className="mb-4">
             <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
               Full Name
