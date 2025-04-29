@@ -25,12 +25,11 @@ const createuser = async (req, res) => {
             return res.status(400).json({ message: "Email already exists. Please login." }); // Send JSON, don't redirect here
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({
             name,
             email,
-            password: hashedPassword,
+            password,
             xp: 0,
             level: 1,
             badges: [],

@@ -10,6 +10,7 @@ import Analytics from './Pages/Analytics';
 import axios from 'axios';
 import { useContext } from 'react';
 import UserContext from './Contexts/Context';
+import Settings from './Pages/Settings';
 
 const App = () => {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/task" element={<TaskManager />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
       </UserContext.Provider>

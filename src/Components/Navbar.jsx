@@ -46,7 +46,7 @@ const Navbar = () => {
       onMouseOver={handleMouseOver}
       onMouseLeave={handleMouseLeave}
       className={`
-        fixed bg-white border z-999 transition-all duration-300 ease-in-out
+        fixed bg-white shadow-[0_-2px_35px_rgba(0,0,0,0.25)] md:shadow-[2px_0px_35px_rgba(0,0,0,0.25)] z-999 transition-all duration-300 ease-in-out
         flex ${isSidebar ? "flex-col" : "flex-row"}
         ${isSidebar ? "top-0 left-0 min-h-screen w-[5%] hover:w-[20%]" : "bottom-0 left-0 w-full h-[10vh]"}
         items-center pt-2
