@@ -1,14 +1,24 @@
 import User from "../models/usermodel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import Badge from "../models/badgemodel.js";
+import usernameAuth from "../utils/usernameauth.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 const createuser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { firstname, lastname, username, email, password } = req.body;
 
-    if (!name || !email || !password) {
-        return res.status(400).json({ message: "Name, email, and password are required." });
+    if (!firstname || !lastname || !username || !email || !password) {
+        return res.status(400).json({ message: "Name, email, username, and password are required." });
+    }
+    if (username.length < 3) {
+        return res.status(400).json({ message: "Username must be at least 3 characters long." });
+    }
+    
+    const usernameExists = await usernameAuth(username);
+    if (usernameExists) {
+        return res.status(400).json({ message: "Username already exists. Please choose another." });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,14 +32,16 @@ const createuser = async (req, res) => {
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: "Email already exists. Please login." }); // Send JSON, don't redirect here
+            return res.status(400).json({ message: "Email already exists. Please login." });
         }
 
-
+        // Create the user (no need to manually hash the password, it's handled by the pre hook in the model)
         const user = await User.create({
-            name,
+            firstname,
+            lastname,
+            username,
             email,
-            password,
+            password, // plain password is passed, it will be hashed automatically in the model's pre hook
             xp: 0,
             level: 1,
             badges: [],
@@ -41,22 +53,40 @@ const createuser = async (req, res) => {
             createdAt: new Date(),
         });
 
+        // Check if the "Beginner" badge already exists for the user
+        const existingBadge = await Badge.findOne({ userId: user._id, name: "Beginner" });
+        if (!existingBadge) {
+            // Create default badge for the user
+            await Badge.create({
+                userId: user._id,
+                name: "Beginner",
+                description: "Complete your first task.",
+            });
+        }
+
         const userObj = user.toObject();
-        delete userObj.password;
+        delete userObj.password; // Don't send password in the response
 
         jwt.sign({ id: userObj._id }, process.env.JWT_SECRET, (err, token) => {
             if (err) {
                 return res.status(500).json({ message: "Error generating token." });
             }
-            res.cookie('token', token, { httpOnly: true, secure: false, maxAge: 60 * 24 * 60 * 60 * 1000 }); // Cookie set
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // Secure in production
+                maxAge: 60 * 24 * 60 * 60 * 1000,
+                sameSite: 'Strict', // Prevent CSRF
+            });
 
-            return res.status(201).redirect('/'); // Redirect to the home page after successful registration
+            return res.status(201).json({ message: "Registration successful" });
         });
 
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
-}
+};
+
+
 
 const loginuser = async (req, res) => {
     const {email,password} = req.body;

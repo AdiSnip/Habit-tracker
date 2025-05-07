@@ -1,70 +1,179 @@
-
+import axios from 'axios';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const Signup = () => {
+let usernameTimeout;
 
-  // Handle form submission
+const Signup = () => {
+  const [formData, setFormData] = useState({
+    firstname: '',
+    lastname: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const [unauthmessage, setUnauthmessage] = useState(null);
+  const [usernameAvailable, setUsernameAvailable] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'username') {
+      clearTimeout(usernameTimeout);
+      if (value.length < 3) {
+        setUsernameAvailable(false);
+        setUnauthmessage('Username must be at least 3 characters.');
+        return;
+      }
+      usernameTimeout = setTimeout(() => {
+        axios
+          .post('/api/usernameauth', { username: value })
+          .then((res) => {
+            setUsernameAvailable(true);
+            setUnauthmessage(res.data.message);
+          })
+          .catch((err) => {
+            setUsernameAvailable(false);
+            setUnauthmessage(err.response?.data?.message || 'Username check failed.');
+          });
+      }, 500);
+    }
+
+    if (name === 'password' || name === 'confirmPassword') {
+      const pass = name === 'password' ? value : formData.password;
+      const confirm = name === 'confirmPassword' ? value : formData.confirmPassword;
+      setPasswordMismatch(pass !== confirm);
+    }
+  };
+
+  const isFormValid =
+    Object.values(formData).every((val) => val.trim()) &&
+    usernameAvailable &&
+    !passwordMismatch;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const { firstname, lastname, username, email, password } = formData;
+
+      const res = await axios.post('/api/register', {
+        firstname,
+        lastname,
+        username,
+        email,
+        password
+      });
+
+      if (res.status === 201) {
+        setSuccessMessage('Registration successful. Redirecting...');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
+      }
+    } catch (err) {
+      setErrorMessage(err.response?.data?.message || 'Registration failed.');
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center absolute w-full h-full left-0 top-0 z-1000 bg-gray-100">
+    <div className="min-h-screen w-full absolute top-0 left-0 flex items-center justify-center z-999 bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
-        <form method='post' action='/api/register'>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-              Full Name
-            </label>
+
+        {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
+        {successMessage && <div className="text-green-500 text-center mb-4">{successMessage}</div>}
+        {unauthmessage && (
+          <div
+            className={`text-center mb-4 ${
+              usernameAvailable ? 'text-green-500' : 'text-red-500'
+            }`}
+          >
+            {unauthmessage}
+          </div>
+        )}
+        {passwordMismatch && (
+          <div className="text-red-500 text-center mb-4">Passwords do not match.</div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="flex gap-3 mb-4">
             <input
               type="text"
-              id="name"
-              name="name"
+              name="firstname"
+              value={formData.firstname}
+              onChange={handleChange}
+              placeholder="First Name"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-1/2 px-3 py-2 border rounded-md"
+            />
+            <input
+              type="text"
+              name="lastname"
+              value={formData.lastname}
+              onChange={handleChange}
+              placeholder="Last Name"
+              required
+              className="w-1/2 px-3 py-2 border rounded-md"
             />
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+            className="w-full mb-4 px-3 py-2 border rounded-md"
+          />
 
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            required
+            className="w-full mb-4 px-3 py-2 border rounded-md"
+          />
+
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password (min 6 chars)"
+            required
+            className="w-full mb-4 px-3 py-2 border rounded-md"
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            required
+            className="w-full mb-6 px-3 py-2 border rounded-md"
+          />
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+            disabled={!isFormValid}
+            className={`w-full py-2 px-4 rounded-md transition duration-200 ${
+              isFormValid
+                ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+            }`}
           >
             Sign Up
           </button>
@@ -72,7 +181,7 @@ const Signup = () => {
 
         <p className="text-center text-gray-600 mt-4">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-500 hover:text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-500 hover:underline">
             Login
           </Link>
         </p>
@@ -81,4 +190,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default Signup;

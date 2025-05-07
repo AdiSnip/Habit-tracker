@@ -1,12 +1,9 @@
 import React from "react";
 import { Trophy, Users, CheckCircle } from "lucide-react";
 
-const Container = () => {
-  const todayTasks = [
-    { id: 1, title: "Complete 5 Pomodoros", difficulty: "Medium", points: 50 },
-    { id: 2, title: "Read 10 Pages", difficulty: "Easy", points: 20 },
-    { id: 3, title: "Workout 30 min", difficulty: "Hard", points: 100 },
-  ];
+const Container = ({data}) => {
+  if(!data) return
+  let tasks = data[2];
 
   const userStats = {
     xp: 1200,
@@ -15,10 +12,10 @@ const Container = () => {
     streak: 12,
     dailyChallengeCompleted: true,
     username: "Alex",
-    avatar: "https://i.pravatar.cc/150?img=3", // Placeholder Avatar
+    avatar: "none", // Placeholder Avatar
   };
 
-  const progressPercent = (userStats.xp % 1000) / 10;
+  const progressPercent = (data[0].xp % 1000) / 10;
 
   return (
     <div className="min-h-screen bg-white p-6 text-black">
@@ -28,8 +25,8 @@ const Container = () => {
         
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-bold mb-1">Welcome back, {userStats.username} 👋</h1>
-          <p className="text-sm text-gray-600">Level {userStats.level} • {userStats.xp} XP</p>
+          <h1 className="text-3xl font-bold mb-1">Welcome back, {data[0].firstname} 👋</h1>
+          <p className="text-sm text-gray-600">Level {data[0].level} • {data[0].xp} XP</p>
 
           {/* Progress */}
           <div className="mt-3 w-full bg-gray-200 rounded-full h-3">
@@ -44,13 +41,12 @@ const Container = () => {
         {/* Profile Section */}
         <div className="flex items-center gap-4 mt-6 md:mt-0">
           <img
-            src={userStats.avatar}
+            src={data[0].avatar}
             alt="Profile"
             className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
           />
           <div className="flex flex-col">
-            <span className="font-semibold">{userStats.username}</span>
-            <span className="text-xs text-gray-500">#ID: 3241</span> {/* Optional ID/Tag */}
+            <span className="font-semibold">{data[0].username}</span>
           </div>
         </div>
 
@@ -60,34 +56,38 @@ const Container = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* Section 1: Today's Tasks */}
-        <div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col justify-between">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold flex items-center mb-4">
-              <CheckCircle className="mr-2 text-green-500" /> Today's Tasks
-            </h2>
-            <ul className="space-y-4">
-              {todayTasks.map(task => (
-                <li key={task.id} className="p-4 bg-white rounded-xl flex justify-between items-center hover:bg-gray-50 transition">
-                  <div>
-                    <p className="font-semibold">{task.title}</p>
-                    <div className="text-xs flex gap-2 mt-1 text-gray-500">
-                      <span className="px-2 py-0.5 bg-gray-200 rounded-full">{task.difficulty}</span>
-                      <span>{task.points} XP</span>
-                    </div>
-                  </div>
-                  <button className="text-green-600 hover:bg-green-100 border border-green-600 font-bold text-sm py-1 px-3 rounded-full transition">
-                    Complete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+{/* Section 1: Today's Tasks */}
+<div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col justify-between">
+  <div className="mb-6">
+    <h2 className="text-xl font-bold flex items-center mb-4">
+      <CheckCircle className="mr-2 text-green-500" /> Today's Tasks
+    </h2>
 
-          {/* View All Button */}
-          <div className="text-center">
-            <button className="mt-6 text-blue-600 hover:underline text-sm">View All Tasks</button>
-          </div>
-        </div>
+    <ul className="space-y-4">
+      {tasks
+        .filter(task => new Date(task.createdAt).toDateString() === new Date().toDateString())
+        .map(task => (
+          <li
+            key={task._id}
+            className="p-4 bg-white rounded-xl flex justify-between items-center hover:bg-gray-50 transition"
+          >
+            <div>
+              <p className="font-semibold text-gray-800">{task.title}</p>
+              <span className="text-xs text-gray-500">{task.xpValue} XP</span>
+            </div>
+            <button className="text-green-600 hover:bg-green-100 border border-green-600 font-semibold text-sm py-1 px-3 rounded-full transition">
+              Complete
+            </button>
+          </li>
+        ))}
+    </ul>
+  </div>
+
+  <div className="text-center">
+    <button className="mt-6 text-blue-600 hover:underline text-sm">View All Tasks</button>
+  </div>
+</div>
+
 
         {/* Section 2: Achievements */}
         <div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col">
@@ -95,8 +95,11 @@ const Container = () => {
             <Trophy className="mr-2 text-purple-500" /> Achievements
           </h2>
           <div className="flex flex-col gap-4">
-            <StatItem label="Badges Earned" value={userStats.badges} />
-            <StatItem label="Streak" value={`${userStats.streak} days`} />
+            <StatItem label="Badges Earned" value={data[0].badges.length} />
+            <StatItem label="Streak" value={`${data[0].streak.current} days`} />
+            {
+              //this will be updating soon
+            }
             <StatItem 
               label="Daily Challenge" 
               value={userStats.dailyChallengeCompleted ? "Completed" : "Incomplete"}

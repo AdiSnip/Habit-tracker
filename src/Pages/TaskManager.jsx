@@ -1,58 +1,49 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
-const TaskManager = () => {
+const TaskManager = ({ getData }) => {
   const [tasks, setTasks] = useState([
-    { id: 1, title: 'Complete project documentation', completed: false, priority: 'high', dueDate: '2024-03-20' },
-    { id: 2, title: 'Review pull requests', completed: false, priority: 'medium', dueDate: '2024-03-19' },
-    { id: 3, title: 'Team meeting', completed: true, priority: 'low', dueDate: '2024-03-18' },
-  ])
-
+    { id: 1, title: 'Complete project documentation', completed: false, dueDate: '2024-03-20', description: 'Write detailed documentation for the project.' },
+    { id: 2, title: 'Review pull requests', completed: false, dueDate: '2024-03-19', description: 'Review the latest pull requests from team members.' },
+    { id: 3, title: 'Team meeting', completed: true, dueDate: '2024-03-18', description: 'Discuss project updates and timelines with the team.' },
+  ]);
   const [newTask, setNewTask] = useState({
     title: '',
-    priority: 'medium',
     dueDate: '',
-  })
+    description: '', // Ensure description is part of newTask state
+  });
+  const [showAddTask, setShowAddTask] = useState(false);
 
-  const [showAddTask, setShowAddTask] = useState(false)
+  const handleAddTask = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
 
-  const handleAddTask = (e) => {
-    e.preventDefault()
     if (newTask.title.trim()) {
       const task = {
         id: Date.now(),
         title: newTask.title,
         completed: false,
-        priority: newTask.priority,
         dueDate: newTask.dueDate,
-      }
-      setTasks([...tasks, task])
-      setNewTask({ title: '', priority: 'medium', dueDate: '' })
-      setShowAddTask(false)
+        description: newTask.description, // Include description when adding new task
+      };
+
+      // Add task to state
+      setTasks([...tasks, task]);
+      setNewTask({ title: '', dueDate: '', description: '' }); // Clear form
+      setShowAddTask(false);
+
+      // Call getData function passed as a prop to refresh the task data (if needed)
+      getData();
     }
-  }
+  };
 
   const toggleTask = (id) => {
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, completed: !task.completed } : task
-    ))
-  }
+    ));
+  };
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter(task => task.id !== id))
-  }
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800'
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'low':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
+    setTasks(tasks.filter(task => task.id !== id));
+  };
 
   return (
     <div className="min-h-[92vh] bg-zinc-200 p-6">
@@ -75,35 +66,38 @@ const TaskManager = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
                   <input
                     type="text"
-                    value={newTask.title}
+                    name="title"
+                    required
+                    autoComplete="off"
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter task title"
-                    required
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                  <select
-                    value={newTask.priority}
-                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
                   <input
                     type="date"
+                    name="dueDate"
                     value={newTask.dueDate}
                     onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  rows="3"
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter task details"
+                />
+              </div>
+
               <div className="mt-4">
                 <button
                   type="submit"
@@ -132,16 +126,14 @@ const TaskManager = () => {
                     <h3 className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
                       {task.title}
                     </h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                    {task.dueDate && (
+                      <span className="text-xs text-gray-500">
+                        Due: {new Date(task.dueDate).toLocaleDateString()}
                       </span>
-                      {task.dueDate && (
-                        <span className="text-xs text-gray-500">
-                          Due: {new Date(task.dueDate).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                    {task.description && (
+                      <p className="mt-2 text-sm text-gray-600">{task.description}</p> // Display description
+                    )}
                   </div>
                 </div>
                 <button
@@ -158,7 +150,7 @@ const TaskManager = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TaskManager 
+export default TaskManager;
