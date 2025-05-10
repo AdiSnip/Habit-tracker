@@ -13,4 +13,4 @@ If you are developing a production application, we recommend using TypeScript wi
 
 
 
-<h1 class="none">now update addtask component as according to task model in backend</h1>
+create delete and update for task

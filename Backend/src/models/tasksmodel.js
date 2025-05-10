@@ -4,6 +4,7 @@ const taskSchema = new mongoose.Schema({
   userID:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title:      { type: String, required: true },
   description:{ type: String },
+  priority:{ type: String, default: "Low" },
   dueDate:    { type: Date },
   // category:   { type: String },
 

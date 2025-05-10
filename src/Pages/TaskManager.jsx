@@ -1,48 +1,61 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const TaskManager = ({ getData }) => {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Complete project documentation', completed: false, dueDate: '2024-03-20', description: 'Write detailed documentation for the project.' },
-    { id: 2, title: 'Review pull requests', completed: false, dueDate: '2024-03-19', description: 'Review the latest pull requests from team members.' },
-    { id: 3, title: 'Team meeting', completed: true, dueDate: '2024-03-18', description: 'Discuss project updates and timelines with the team.' },
-  ]);
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     title: '',
     dueDate: '',
-    description: '', // Ensure description is part of newTask state
+    description: '',
+    priority: 'Low'
   });
   const [showAddTask, setShowAddTask] = useState(false);
 
+  useEffect(() => {
+    axios.get('/api/readtask')
+      .then(res => {
+        setTasks(res.data.tasks);
+      })
+      .catch(error => {
+        console.error('Error fetching tasks:', error);
+      });
+  }, []);
+
   const handleAddTask = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
-
+    e.preventDefault();
+  
     if (newTask.title.trim()) {
-      const task = {
-        id: Date.now(),
-        title: newTask.title,
-        completed: false,
-        dueDate: newTask.dueDate,
-        description: newTask.description, // Include description when adding new task
-      };
-
-      // Add task to state
-      setTasks([...tasks, task]);
-      setNewTask({ title: '', dueDate: '', description: '' }); // Clear form
-      setShowAddTask(false);
-
-      // Call getData function passed as a prop to refresh the task data (if needed)
-      getData();
+      try {
+        const res = await axios.post('/api/createtask', newTask);
+        if (res.data.success) {
+          setTasks([...tasks, res.data.task]); // Add the new task returned from backend
+          setNewTask({ title: '', dueDate: '', description: '' });
+          setShowAddTask(false);
+        }
+      } catch (error) {
+        console.error('Error creating task:', error);
+      }
     }
   };
+  
 
-  const toggleTask = (id) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+  const toggleTask = async (id) => {
+    const updatedTasks = tasks.map(task =>
+      task._id === id ? { ...task, isCompleted: !task.isCompleted } : task
+    );
+    setTasks(updatedTasks);
+
+    // Optional: Update completion in backend
+    // await axios.patch(`/api/updatetask/${id}`, { isCompleted: !currentStatus });
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const deleteTask = async (id) => {
+    try {
+      await axios.delete(`/api/deletetask/${id}`);
+      setTasks(tasks.filter(task => task._id !== id));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
   return (
@@ -66,9 +79,9 @@ const TaskManager = ({ getData }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
                   <input
                     type="text"
-                    name="title"
                     required
                     autoComplete="off"
+                    value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter task title"
@@ -78,18 +91,28 @@ const TaskManager = ({ getData }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
                   <input
                     type="date"
-                    name="dueDate"
                     value={newTask.dueDate}
                     onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <select
+                    value={newTask.priority}
+                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
                 </div>
               </div>
 
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
-                  name="description"
                   rows="3"
                   value={newTask.description}
                   onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
@@ -112,32 +135,33 @@ const TaskManager = ({ getData }) => {
           <div className="space-y-4">
             {tasks.map(task => (
               <div
-                key={task.id}
+                key={task._id}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
               >
                 <div className="flex items-center space-x-4">
                   <input
                     type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleTask(task.id)}
+                    checked={task.isCompleted}
+                    onChange={() => toggleTask(task._id)}
                     className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                   />
                   <div>
-                    <h3 className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                    <h3 className={`font-medium ${task.isCompleted ? 'line-through text-gray-500' : 'text-gray-800'}`}>
                       {task.title}
                     </h3>
-                    {task.dueDate && (
-                      <span className="text-xs text-gray-500">
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                    )}
+                    <span className="text-xs text-gray-500">
+                      Created: {new Date(task.createdAt).toLocaleDateString()}
+                    </span>
                     {task.description && (
-                      <p className="mt-2 text-sm text-gray-600">{task.description}</p> // Display description
+                      <p className="mt-2 text-sm text-gray-600">{task.description}</p>
                     )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      Priority: {task.priority} | XP: {task.xpValue}
+                    </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => deleteTask(task._id)}
                   className="text-red-500 hover:text-red-700"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -147,6 +171,7 @@ const TaskManager = ({ getData }) => {
               </div>
             ))}
           </div>
+
         </div>
       </div>
     </div>

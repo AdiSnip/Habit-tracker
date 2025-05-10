@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import login from './routes/login.route.js';
 import usernameauth from './routes/usernameauth.route.js';
 import createTaskRoute from './routes/Create/createTask.route.js';
+import readTaskRoute from './routes/Read/Taskread.route.js';
 
 const app = express();
 
@@ -20,5 +21,7 @@ app.use('/api/user', userdata);
 app.use('/api/login', login)
 app.use('/api/usernameauth', usernameauth);
 app.use('/api/createtask', createTaskRoute)
+app.use('/api/readtask', readTaskRoute);
+
 
 export default app;
