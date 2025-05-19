@@ -2,105 +2,110 @@ import React, { useEffect, useState } from "react";
 import { Trophy, Users, CheckCircle } from "lucide-react";
 import axios from "axios";
 
+/**
+ * Main Dashboard Container Component
+ * @param {Object} data - Array containing the current user object as the first element.
+ */
 const Container = ({ data }) => {
   const [tasks, setTasks] = useState([]);
-  const user = data?.[0];
+  const user = data?.[0]; // Extracting the user object from props
 
+  // Fetch tasks only when user is available
   useEffect(() => {
     if (user) {
-      // Fetch tasks from the backend
       axios.get("/api/readtask")
-        .then((res) => {
-          console.log("Fetched tasks:", res.data); // Log the data to check
-          setTasks(res.data.tasks || []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch tasks:", err);
-        });
+        .then((res) => setTasks(res.data.tasks || []))
+        .catch((err) => console.error("Failed to fetch tasks:", err));
     }
   }, [user]);
 
+  // Show loading state if user data hasn't arrived yet
   if (!user) return <div className="p-4 text-center text-gray-500">Loading...</div>;
 
+  // Calculate progress percentage for XP bar
   const progressPercent = (user.xp % 1000) / 10;
 
-  // Compare only by date (ignore time part)
+  // Check if a given date is today
   const isToday = (dateString) => {
     const taskDate = new Date(dateString);
     const today = new Date();
-
-    // Strip time from both dates for comparison
     taskDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
-
     return taskDate.getTime() === today.getTime();
   };
 
+  // Filter today's incomplete tasks
   const todaysTasks = tasks.filter(task => isToday(task.dueDate) && !task.isCompleted);
 
   return (
-    <div className="min-h-screen bg-white p-6 text-black">
-      {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Welcome back, {user.firstname} 👋</h1>
-          <p className="text-sm text-gray-600">Level {user.level} • {user.xp} XP</p>
-          <div className="mt-3 w-full bg-gray-200 rounded-full h-3">
+    <div className="min-h-screen bg-gradient-to-tr from-blue-50 to-purple-50 p-6 text-black">
+      
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        
+        {/* User Welcome Info and XP Progress Bar */}
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-blue-800">Welcome, {user.firstname} 👋</h1>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-sm bg-blue-200 text-blue-700 font-semibold px-2 py-1 rounded-xl">
+              Level {user.level}
+            </span>
+            <span className="text-sm text-gray-600">{user.xp} XP</span>
+          </div>
+          
+          {/* XP Progress Bar */}
+          <div className="mt-2 w-full bg-gray-300 rounded-full h-3 shadow-inner">
             <div
-              className="bg-blue-500 h-3 rounded-full transition-all duration-300 ease-out"
+              className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             ></div>
           </div>
-          <p className="text-xs mt-1 text-gray-500">Progress to next level</p>
+          <p className="text-xs text-gray-500 mt-1">Progress to next level</p>
         </div>
 
-        <div className="flex items-center gap-4 mt-6 md:mt-0">
+        {/* User Avatar & Username */}
+        <div className="flex items-center gap-4 mt-6 md:mt-0 bg-white p-2 rounded-full shadow-md">
           <img
             src={user.avatar}
             alt="Profile"
-            className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+            className="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
           />
-          <div className="flex flex-col">
-            <span className="font-semibold">{user.username}</span>
+          <div>
+            <p className="font-semibold text-gray-700">{user.username}</p>
           </div>
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Dashboard Grid: Tasks, Achievements, Leaderboard */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {/* Tasks */}
-        <div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col justify-between">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold flex items-center mb-4">
-              <CheckCircle className="mr-2 text-green-500" /> Today's Tasks
-            </h2>
-
+        {/* Today's Tasks Card */}
+        <Card>
+          <SectionHeader icon={<CheckCircle className="text-green-500" />} title="Today's Tasks" />
+          <div className="flex flex-col justify-between h-full">
             {todaysTasks.length > 0 ? (
-              <ul className="space-y-3">
-                {todaysTasks.map((task, index) => (
-                  <li key={index} className="bg-white p-3 rounded-lg shadow-sm">
-                    <h3 className="font-semibold text-sm">{task.title}</h3>
-                    <p className="text-xs text-gray-500">{task.priority} Priority • Due: {new Date(task.dueDate).toLocaleDateString()}</p>
+              <ul className="space-y-3 mb-4">
+                {todaysTasks.map((task, i) => (
+                  <li key={i} className="bg-blue-50 border border-blue-100 p-3 rounded-xl shadow-sm hover:bg-blue-100">
+                    <h3 className="font-semibold text-sm text-blue-800">{task.title}</h3>
+                    <p className="text-xs text-gray-500">
+                      {task.priority} Priority • Due: {new Date(task.dueDate).toLocaleDateString()}
+                    </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500">No tasks due today 🎉</p>
+              <p className="text-sm text-gray-500 mb-4">No tasks due today 🎉</p>
             )}
+            <button className="text-sm text-purple-600 hover:underline text-center">View All Tasks</button>
           </div>
+        </Card>
 
-          <div className="text-center">
-            <button className="mt-6 text-blue-600 hover:underline text-sm">View All Tasks</button>
-          </div>
-        </div>
-
-        {/* Achievements */}
-        <div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col">
-          <h2 className="text-xl font-bold flex items-center mb-6">
-            <Trophy className="mr-2 text-purple-500" /> Achievements
-          </h2>
-          <div className="flex flex-col gap-4">
+        {/* Achievements Card */}
+        <Card>
+          <SectionHeader icon={<Trophy className="text-yellow-500" />} title="Achievements" />
+          <div className="flex flex-col gap-4 mt-2">
             <StatItem label="Badges Earned" value={user.badges.length} />
             <StatItem label="Streak" value={`${user.streak.current} days`} />
             <StatItem
@@ -109,44 +114,67 @@ const Container = ({ data }) => {
               color={user.dailyChallengeCompleted ? "text-green-600" : "text-red-500"}
             />
           </div>
-        </div>
+        </Card>
 
-        {/* Leaderboard */}
-        <div className="bg-gray-100 shadow-md rounded-2xl p-6 flex flex-col">
-          <h2 className="text-xl font-bold flex items-center mb-6">
-            <Users className="mr-2 text-blue-500" /> Leaderboard
-          </h2>
-          <ul className="space-y-4">
+        {/* Leaderboard Card (Static Example) */}
+        <Card>
+          <SectionHeader icon={<Users className="text-blue-600" />} title="Leaderboard" />
+          <ul className="space-y-4 mt-2">
             <LeaderboardItem position="🥇" name="Jamie" points="3200 XP" />
             <LeaderboardItem position="🥈" name="Alex" points="2800 XP" />
             <LeaderboardItem position="🥉" name="Taylor" points="2500 XP" />
           </ul>
-        </div>
-
+        </Card>
       </div>
 
-      {/* Footer */}
-      <div className="text-center text-xs text-gray-400 mt-10">
-        “Consistency is more important than perfection.” 🚀
-      </div>
+      {/* Motivational Footer */}
+      <p className="text-center text-xs text-gray-400 mt-10 italic">
+        “Consistency beats intensity.” 🚀
+      </p>
     </div>
   );
 };
 
+//////////////////////////////////////////////////////////////
+// Reusable Components
+//////////////////////////////////////////////////////////////
+
+/**
+ * Card Component - Common wrapper for each dashboard section
+ */
+const Card = ({ children }) => (
+  <div className="bg-white rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all">{children}</div>
+);
+
+/**
+ * SectionHeader Component - Header with icon and title
+ */
+const SectionHeader = ({ icon, title }) => (
+  <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-gray-800">
+    {icon} {title}
+  </h2>
+);
+
+/**
+ * StatItem Component - For showing labeled stats with optional color
+ */
 const StatItem = ({ label, value, color = "text-black" }) => (
-  <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+  <div className="flex justify-between items-center bg-purple-50 p-3 rounded-xl shadow-sm">
     <span className="text-sm">{label}</span>
-    <span className={`font-bold ${color}`}>{value}</span>
+    <span className={`font-semibold ${color}`}>{value}</span>
   </div>
 );
 
+/**
+ * LeaderboardItem Component - Shows rank, user name, and points
+ */
 const LeaderboardItem = ({ position, name, points }) => (
-  <li className="flex justify-between items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition">
-    <div className="flex items-center gap-2">
-      <span className="text-lg">{position}</span>
+  <li className="flex justify-between items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+    <div className="flex items-center gap-2 font-medium">
+      <span className="text-xl">{position}</span>
       <span>{name}</span>
     </div>
-    <span className="text-sm text-gray-500">{points}</span>
+    <span className="text-sm text-gray-600">{points}</span>
   </li>
 );
 

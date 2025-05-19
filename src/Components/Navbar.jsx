@@ -2,86 +2,108 @@ import React, { useEffect, useState } from 'react';
 import { MdDashboard, MdAnalytics } from "react-icons/md";
 import { FaTasks } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const [isSidebar, setIsSidebar] = useState(window.innerWidth >= 1060); // Notice: 1060px breakpoint
-  const [opt, setOpt] = useState([]);
-  const [logotxt, setLogotxt] = useState("");
-  const [padding, setPadding] = useState("justify-center");
+  const [isSidebar, setIsSidebar] = useState(window.innerWidth >= 1060);
+  const [isHovered, setIsHovered] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleResize = () => {
       setIsSidebar(window.innerWidth >= 1060);
     };
     window.addEventListener('resize', handleResize);
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const items = [
-    { icon: <MdDashboard />, label: "Dashboard", href: "/" },
-    { icon: <FaTasks />, label: "Tasks", href: "/Task" },
-    { icon: <MdAnalytics />, label: "Analytics", href: "/analytics" },
+    { icon: <MdDashboard size={24} />, label: "Dashboard", href: "/" },
+    { icon: <FaTasks size={22} />, label: "Tasks", href: "/Task" },
+    { icon: <MdAnalytics size={24} />, label: "Analytics", href: "/analytics" },
   ];
 
-  const handleMouseOver = () => {
-    if (isSidebar) {
-      setOpt(["logo", "Dashboard", "Tasks", "Analytics", "Settings"]);
-      setPadding("justify-start pl-2");
-      setLogotxt("Taskify");
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (isSidebar) {
-      setOpt([]);
-      setPadding("justify-center");
-      setLogotxt("");
-    }
-  };
-
   return (
-    <nav 
-      onMouseOver={handleMouseOver}
-      onMouseLeave={handleMouseLeave}
+    <nav
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`
-        fixed bg-white shadow-[0_-2px_35px_rgba(0,0,0,0.25)] md:shadow-[2px_0px_35px_rgba(0,0,0,0.25)] z-99 transition-all duration-300 ease-in-out
+        fixed bg-white shadow-lg rounded-xl
+        transition-all duration-300 ease-in-out z-50
         flex ${isSidebar ? "flex-col" : "flex-row"}
-        ${isSidebar ? "top-0 left-0 min-h-screen w-[5%] hover:w-[20%]" : "bottom-0 left-0 w-full h-[10vh]"}
-        items-center pt-2
+        ${isSidebar 
+          ? "top-0 left-0 min-h-[100vh] w-20 hover:w-56" 
+          : "bottom-4 left-1/2 transform -translate-x-1/2 w-[90vw] h-16 rounded-3xl"}
       `}
+      style={{ backdropFilter: "blur(12px)" }}
     >
-      {/* Logo only for Sidebar */}
+      {/* Logo for sidebar */}
       {isSidebar && (
-        <div className='flex flex-row h-[8vh] w-full justify-center items-center'>
-          <img src="/logo.png" alt="logo" className='scale-75 w-[60px]' />
-          <div className='text-md md:text-xl font-medium'>{logotxt}</div>
+        <div className={`flex items-center justify-center gap-3 p-4 mb-6 border-b border-blue-400`}>
+          <img
+            src="/logo.png"
+            alt="logo"
+            className={`w-10 h-10 rounded-full object-cover ${!isHovered ? 'ml-20':'ml-0'}`}
+          />
+          <span
+            className={`text-xl font-bold text-blue-600 transition-opacity duration-300 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            Taskify
+          </span>
         </div>
       )}
 
       {/* Menu Items */}
-      <section className={`flex ${isSidebar ? "flex-col" : "flex-row"} w-full h-full justify-evenly ${isSidebar ? "pt-[20%]" : ""}`}>
-        {items.map(({ icon, label, href }, i) => (
-          <Link
-            key={i}
-            to={href}
-            className={`text-black flex ${padding} items-center ${isSidebar ? "flex-nowrap" : "flex-row"} gap-1 hover:bg-zinc-200 ${isSidebar ? "h-[8vh] w-full" : "h-full w-full"}`}
-          >
-            {icon}
-            {isSidebar && <div>{opt.length ? label : null}</div>}
-          </Link>
-        ))}
+      <div className={`flex ${isSidebar ? "flex-col" : "flex-row"} flex-1 justify-around items-center`}>
+        {items.map(({ icon, label, href }) => {
+          const isActive = location.pathname === href;
 
-        {/* Settings always last */}
+          return (
+            <Link
+              key={label}
+              to={href}
+              className={`
+                group relative flex items-center justify-center gap-3
+                ${isSidebar ? "w-full px-4 py-3 rounded-lg mb-4" : "flex-1 h-full rounded-full"}
+                ${isActive ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg" : "text-gray-600 hover:text-blue-600 hover:bg-blue-100"}
+                transition-all duration-300 ease-in-out cursor-pointer
+                hover:scale-105
+                ${isSidebar && isHovered ? "justify-start" : "justify-center"}
+              `}
+            >
+              <div className="text-2xl">{icon}</div>
+              {/* Label only visible on sidebar hover */}
+              {isSidebar && isHovered && (
+                <span className="text-lg font-semibold select-none whitespace-nowrap">
+                  {label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Settings link */}
         <Link
           to="/settings"
-          className={`text-black flex ${padding} items-center ${isSidebar ? "flex-nowrap" : "flex-col"} gap-1 hover:bg-zinc-200 ${isSidebar ? "h-[8vh] w-full absolute bottom-1" : "h-full w-full"}`}
+          className={`
+            group relative flex items-center justify-center gap-3
+            ${isSidebar ? "w-full px-4 py-3 rounded-lg mt-auto mb-4" : "flex-1 h-full rounded-full"}
+            text-gray-600 hover:text-purple-700 hover:bg-purple-100
+            transition-all duration-300 ease-in-out cursor-pointer hover:scale-105
+            ${location.pathname === "/settings" ? "bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg" : ""}
+            ${isSidebar && isHovered ? "justify-start" : "justify-center"}
+          `}
         >
-          <IoMdSettings />
-          {isSidebar && <div>{opt.length ? "Settings" : null}</div>}
+          <IoMdSettings size={24} />
+          {isSidebar && isHovered && (
+            <span className="text-lg font-semibold select-none whitespace-nowrap">
+              Settings
+            </span>
+          )}
         </Link>
-      </section>
+      </div>
     </nav>
   );
 };
