@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Sparkles, UserPlus2 } from 'lucide-react';
 
 let usernameTimeout;
 
@@ -74,7 +75,7 @@ const Signup = () => {
       });
 
       if (res.status === 201) {
-        setSuccessMessage('Registration successful. Redirecting...');
+        setSuccessMessage('Account created! Summoning portal to login...');
         setTimeout(() => {
           window.location.href = '/';
         }, 1500);
@@ -85,27 +86,32 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen w-full absolute top-0 left-0 flex items-center justify-center z-999 bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-950 text-white font-sans relative overflow-hidden">
 
-        {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
-        {successMessage && <div className="text-green-500 text-center mb-4">{successMessage}</div>}
+      {/* Background Effects */}
+      <div className="absolute top-10 left-10 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+
+      {/* Signup Card */}
+      <div className="relative z-10 bg-white/10 backdrop-blur-lg shadow-2xl rounded-3xl p-8 w-full max-w-xl border border-white/20">
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <UserPlus2 className="text-yellow-300 w-6 h-6" />
+          <h2 className="text-3xl font-bold text-yellow-300 tracking-wider">Create Your Hero Profile</h2>
+        </div>
+
+        {errorMessage && <div className="text-red-400 text-center mb-3">{errorMessage}</div>}
+        {successMessage && <div className="text-green-400 text-center mb-3">{successMessage}</div>}
         {unauthmessage && (
-          <div
-            className={`text-center mb-4 ${
-              usernameAvailable ? 'text-green-500' : 'text-red-500'
-            }`}
-          >
+          <div className={`text-center mb-3 ${usernameAvailable ? 'text-green-400' : 'text-red-400'}`}>
             {unauthmessage}
           </div>
         )}
         {passwordMismatch && (
-          <div className="text-red-500 text-center mb-4">Passwords do not match.</div>
+          <div className="text-red-400 text-center mb-3">Passwords do not match.</div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-3 mb-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4">
             <input
               type="text"
               name="firstname"
@@ -113,7 +119,7 @@ const Signup = () => {
               onChange={handleChange}
               placeholder="First Name"
               required
-              className="w-1/2 px-3 py-2 border rounded-md"
+              className="w-1/2 px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
             <input
               type="text"
@@ -122,7 +128,7 @@ const Signup = () => {
               onChange={handleChange}
               placeholder="Last Name"
               required
-              className="w-1/2 px-3 py-2 border rounded-md"
+              className="w-1/2 px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
 
@@ -131,9 +137,9 @@ const Signup = () => {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="Username"
+            placeholder="Choose a Hero Name"
             required
-            className="w-full mb-4 px-3 py-2 border rounded-md"
+            className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
 
           <input
@@ -141,9 +147,9 @@ const Signup = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder="Guild Email"
             required
-            className="w-full mb-4 px-3 py-2 border rounded-md"
+            className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
 
           <input
@@ -151,9 +157,9 @@ const Signup = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="Password (min 6 chars)"
+            placeholder="Secret Code (min 6 chars)"
             required
-            className="w-full mb-4 px-3 py-2 border rounded-md"
+            className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
 
           <input
@@ -161,28 +167,29 @@ const Signup = () => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="Confirm Password"
+            placeholder="Confirm Secret Code"
             required
-            className="w-full mb-6 px-3 py-2 border rounded-md"
+            className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder:text-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
 
           <button
             type="submit"
             disabled={!isFormValid}
-            className={`w-full py-2 px-4 rounded-md transition duration-200 ${
+            className={`w-full flex items-center justify-center gap-2 py-2 px-4 font-bold rounded-full shadow-lg transition duration-300 ${
               isFormValid
-                ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:scale-105'
+                : 'bg-gray-500 text-white cursor-not-allowed'
             }`}
           >
-            Sign Up
+            <Sparkles className="w-5 h-5" />
+            Begin Your Quest
           </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-4">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-500 hover:underline">
-            Login
+        <p className="text-center text-sm text-white mt-6">
+          Already on a journey?{' '}
+          <Link to="/login" className="text-yellow-300 hover:underline">
+            Return to the Gate
           </Link>
         </p>
       </div>

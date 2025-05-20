@@ -2,30 +2,28 @@ import React, { useEffect, useState } from "react";
 import { Trophy, Users, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-/**
- * Main Dashboard Container Component
- * @param {Object} data - Array containing the current user object as the first element.
- */
 const Container = ({ data }) => {
   const [tasks, setTasks] = useState([]);
-  const user = data?.[0]; // Extracting the user object from props
+  const user = data?.[0];
 
-  // Fetch tasks only when user is available
   useEffect(() => {
     if (user) {
-      axios.get("/api/readtask")
+      axios
+        .get("/api/readtask")
         .then((res) => setTasks(res.data.tasks || []))
         .catch((err) => console.error("Failed to fetch tasks:", err));
     }
   }, [user]);
 
-  // Show loading state if user data hasn't arrived yet
-  if (!user) return <div className="p-4 text-center text-gray-500">Loading...</div>;
+  if (!user)
+    return (
+      <div className="p-4 text-center" style={{ color: "#a1a1aa" }}>
+        Loading...
+      </div>
+    );
 
-  // Calculate progress percentage for XP bar
-  const progressPercent = (user.xp % 1000) / 10;
+  const progressPercent = ((user.xp % 1000) / 10).toFixed(2);
 
-  // Check if a given date is today
   const isToday = (dateString) => {
     const taskDate = new Date(dateString);
     const today = new Date();
@@ -34,91 +32,126 @@ const Container = ({ data }) => {
     return taskDate.getTime() === today.getTime();
   };
 
-  // Filter today's incomplete tasks
-  const todaysTasks = tasks.filter(task => isToday(task.dueDate) && !task.isCompleted);
+  const todaysTasks = tasks.filter(
+    (task) => isToday(task.dueDate) && !task.isCompleted
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-blue-50 to-purple-50 p-6 text-black">
-      
-      {/* Header Section */}
+    <div
+      className="min-h-screen p-6"
+      style={{ backgroundColor: "#1e1f29", color: "#f4f4f5" }}
+    >
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
-        
-        {/* User Welcome Info and XP Progress Bar */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-blue-800">Welcome, {user.firstname} 👋</h1>
-          
+          <h1
+            className="text-3xl font-bold"
+            style={{ color: "#4ade80" }}
+          >
+            Welcome, {user.firstname} 👋
+          </h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm bg-blue-200 text-blue-700 font-semibold px-2 py-1 rounded-xl">
+            <span
+              className="text-sm font-semibold px-2 py-1 rounded-xl"
+              style={{ backgroundColor: "#2a2b3a", color: "#4ade80" }}
+            >
               Level {user.level}
             </span>
-            <span className="text-sm text-gray-600">{user.xp} XP</span>
+            <span className="text-sm" style={{ color: "#a1a1aa" }}>
+              {user.xp} XP
+            </span>
           </div>
-          
-          {/* XP Progress Bar */}
-          <div className="mt-2 w-full bg-gray-300 rounded-full h-3 shadow-inner">
+          <div
+            className="mt-2 w-full rounded-full h-3"
+            style={{ backgroundColor: "#2a2b3a" }}
+          >
             <div
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            ></div>
+              className="h-3 rounded-full transition-all duration-300"
+              style={{
+                width: `${progressPercent}%`,
+                background: "linear-gradient(90deg, #38bdf8, #4ade80)",
+              }}
+            />
           </div>
-          <p className="text-xs text-gray-500 mt-1">Progress to next level</p>
+          <p className="text-xs mt-1" style={{ color: "#a1a1aa" }}>
+            Progress to next level
+          </p>
         </div>
 
-        {/* User Avatar & Username */}
-        <div className="flex items-center gap-4 mt-6 md:mt-0 bg-white p-2 rounded-full shadow-md">
+        <div
+          className="flex items-center gap-4 mt-6 md:mt-0 p-2 rounded-full shadow-md"
+          style={{ backgroundColor: "#2a2b3a" }}
+        >
           <img
             src={user.avatar}
             alt="Profile"
-            className="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+            className="w-12 h-12 rounded-full object-cover border-2"
+            style={{ borderColor: "#38bdf8" }}
           />
           <div>
-            <p className="font-semibold text-gray-700">{user.username}</p>
+            <p style={{ color: "#f4f4f5", fontWeight: "600" }}>
+              {user.username}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Dashboard Grid: Tasks, Achievements, Leaderboard */}
+      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
         {/* Today's Tasks Card */}
         <Card>
-          <SectionHeader icon={<CheckCircle className="text-green-500" />} title="Today's Tasks" />
+          <SectionHeader icon={<CheckCircle style={{ color: "#4ade80" }} />} title="Today's Tasks" />
           <div className="flex flex-col justify-between h-full">
             {todaysTasks.length > 0 ? (
               <ul className="space-y-3 mb-4">
                 {todaysTasks.map((task, i) => (
-                  <li key={i} className="bg-blue-50 border border-blue-100 p-3 rounded-xl shadow-sm hover:bg-blue-100">
-                    <h3 className="font-semibold text-sm text-blue-800">{task.title}</h3>
-                    <p className="text-xs text-gray-500">
-                      {task.priority} Priority • Due: {new Date(task.dueDate).toLocaleDateString()}
+                  <li
+                    key={i}
+                    className="p-3 rounded-xl hover:cursor-pointer transition"
+                    style={{
+                      backgroundColor: "#2a2b3a",
+                      color: "#38bdf8",
+                    }}
+                  >
+                    <h3 className="font-semibold text-sm">{task.title}</h3>
+                    <p className="text-xs" style={{ color: "#a1a1aa" }}>
+                      {task.priority} Priority • Due:{" "}
+                      {new Date(task.dueDate).toLocaleDateString()}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500 mb-4">No tasks due today 🎉</p>
+              <p className="text-sm mb-4" style={{ color: "#a1a1aa" }}>
+                No tasks due today 🎉
+              </p>
             )}
-            <button className="text-sm text-purple-600 hover:underline text-center">View All Tasks</button>
+            <button
+              className="text-sm hover:underline"
+              style={{ color: "#38bdf8" }}
+            >
+              View All Tasks
+            </button>
           </div>
         </Card>
 
         {/* Achievements Card */}
         <Card>
-          <SectionHeader icon={<Trophy className="text-yellow-500" />} title="Achievements" />
+          <SectionHeader icon={<Trophy style={{ color: "#facc15" }} />} title="Achievements" />
           <div className="flex flex-col gap-4 mt-2">
             <StatItem label="Badges Earned" value={user.badges.length} />
             <StatItem label="Streak" value={`${user.streak.current} days`} />
             <StatItem
               label="Daily Challenge"
               value={user.dailyChallengeCompleted ? "Completed" : "Incomplete"}
-              color={user.dailyChallengeCompleted ? "text-green-600" : "text-red-500"}
+              color={user.dailyChallengeCompleted ? "#4ade80" : "#f43f5e"}
             />
           </div>
         </Card>
 
-        {/* Leaderboard Card (Static Example) */}
+        {/* Leaderboard Card */}
         <Card>
-          <SectionHeader icon={<Users className="text-blue-600" />} title="Leaderboard" />
+          <SectionHeader icon={<Users style={{ color: "#38bdf8" }} />} title="Leaderboard" />
           <ul className="space-y-4 mt-2">
             <LeaderboardItem position="🥇" name="Jamie" points="3200 XP" />
             <LeaderboardItem position="🥈" name="Alex" points="2800 XP" />
@@ -127,54 +160,62 @@ const Container = ({ data }) => {
         </Card>
       </div>
 
-      {/* Motivational Footer */}
-      <p className="text-center text-xs text-gray-400 mt-10 italic">
+      <p className="text-center text-xs mt-10 italic" style={{ color: "#a1a1aa" }}>
         “Consistency beats intensity.” 🚀
       </p>
     </div>
   );
 };
 
-//////////////////////////////////////////////////////////////
-// Reusable Components
-//////////////////////////////////////////////////////////////
-
-/**
- * Card Component - Common wrapper for each dashboard section
- */
 const Card = ({ children }) => (
-  <div className="bg-white rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all">{children}</div>
+  <div
+    className="rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all"
+    style={{ backgroundColor: "#2a2b3a" }}
+  >
+    {children}
+  </div>
 );
 
-/**
- * SectionHeader Component - Header with icon and title
- */
 const SectionHeader = ({ icon, title }) => (
-  <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-gray-800">
+  <h2
+    className="text-xl font-bold flex items-center gap-2 mb-4"
+    style={{ color: "#f4f4f5" }}
+  >
     {icon} {title}
   </h2>
 );
 
-/**
- * StatItem Component - For showing labeled stats with optional color
- */
-const StatItem = ({ label, value, color = "text-black" }) => (
-  <div className="flex justify-between items-center bg-purple-50 p-3 rounded-xl shadow-sm">
-    <span className="text-sm">{label}</span>
-    <span className={`font-semibold ${color}`}>{value}</span>
+const StatItem = ({ label, value, color = "#f4f4f5" }) => (
+  <div
+    className="flex justify-between items-center p-3 rounded-xl shadow-sm"
+    style={{ backgroundColor: "#1e1f29" }}
+  >
+    <span className="text-sm" style={{ color: "#a1a1aa" }}>
+      {label}
+    </span>
+    <span className="font-semibold" style={{ color }}>
+      {value}
+    </span>
   </div>
 );
 
-/**
- * LeaderboardItem Component - Shows rank, user name, and points
- */
 const LeaderboardItem = ({ position, name, points }) => (
-  <li className="flex justify-between items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+  <li
+    className="flex justify-between items-center p-3 rounded-xl hover:cursor-pointer transition"
+    style={{
+      backgroundColor: "#2a2b3a",
+      color: "#f4f4f5",
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(74, 222, 128, 0.1)")}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2a2b3a")}
+  >
     <div className="flex items-center gap-2 font-medium">
       <span className="text-xl">{position}</span>
       <span>{name}</span>
     </div>
-    <span className="text-sm text-gray-600">{points}</span>
+    <span className="text-sm" style={{ color: "#a1a1aa" }}>
+      {points}
+    </span>
   </li>
 );
 
