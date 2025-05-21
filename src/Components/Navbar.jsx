@@ -32,10 +32,10 @@ const Navbar = () => {
         transition-all duration-300 ease-in-out z-50
         flex ${isSidebar ? "flex-col" : "flex-row"}
         ${isSidebar 
-          ? "top-0 left-0 min-h-[100vh] w-20 hover:w-56" 
+          ? "top-0 left-0 min-h-[100vh] w-[6%] hover:w-56" 
           : "bottom-4 left-1/2 transform -translate-x-1/2 w-[90vw] h-16 rounded-3xl"}
       `}
-      style={{ backdropFilter: "blur(12px)" }}
+      style={{ backdropFilter: "blur(12px)", backgroundColor: "#1e1f29" }}
     >
       {/* Logo for sidebar */}
       {isSidebar && (
@@ -43,14 +43,14 @@ const Navbar = () => {
           <img
             src="/logo.png"
             alt="logo"
-            className={`w-10 h-10 rounded-full object-cover ${!isHovered ? 'ml-20':'ml-0'}`}
+            className={`w-10  rounded-full object-cover ${!isHovered ? 'ml-22':'ml-0'}`}
           />
           <span
-            className={`text-xl font-bold text-blue-600 transition-opacity duration-300 ${
+            className={`text-xl font-bold text-[#4ade80] transition-opacity duration-300 ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            Taskify
+            Questify
           </span>
         </div>
       )}
@@ -67,7 +67,7 @@ const Navbar = () => {
               className={`
                 group relative flex items-center justify-center gap-3
                 ${isSidebar ? "w-full px-4 py-3 rounded-lg mb-4" : "flex-1 h-full rounded-full"}
-                ${isActive ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg" : "text-gray-600 hover:text-blue-600 hover:bg-blue-100"}
+                ${isActive ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg" : "text-[#4ade80] hover:text-blue-600 hover:bg-blue-100"}
                 transition-all duration-300 ease-in-out cursor-pointer
                 hover:scale-105
                 ${isSidebar && isHovered ? "justify-start" : "justify-center"}
