@@ -39,7 +39,7 @@ const Container = ({ data }) => {
   return (
     <div
       className="min-h-screen p-6"
-      style={{ backgroundColor: "#1e1f29", color: "#f4f4f5" }}
+      style={{ backgroundColor: "black", color: "#f4f4f5" }}
     >
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">

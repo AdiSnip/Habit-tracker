@@ -46,7 +46,7 @@ function getData(){
     <div>
       <UserContext.Provider value={{userdata}}>
       <Navbar />
-      <div className="flex flex-col md:pl-[6%] bg-[#1e1f29]">
+      <div className="flex flex-col md:pl-[6%] bg-black">
         <Routes>
           <Route path="/" element={<Container data={userdata}/>} />
           <Route path="/login" element={<Login />} />

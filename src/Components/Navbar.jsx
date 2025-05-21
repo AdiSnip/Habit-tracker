@@ -35,7 +35,7 @@ const Navbar = () => {
           ? "top-0 left-0 min-h-[100vh] w-[6%] hover:w-56" 
           : "bottom-4 left-1/2 transform -translate-x-1/2 w-[90vw] h-16 rounded-3xl"}
       `}
-      style={{ backdropFilter: "blur(12px)", backgroundColor: "#1e1f29" }}
+      style={{ backdropFilter: "blur(12px)", backgroundColor: "black" }}
     >
       {/* Logo for sidebar */}
       {isSidebar && (
@@ -43,7 +43,7 @@ const Navbar = () => {
           <img
             src="/logo.png"
             alt="logo"
-            className={`w-10  rounded-full object-cover ${!isHovered ? 'ml-22':'ml-0'}`}
+            className={`w-10 scale-160 rounded-full object-cover ${!isHovered ? 'ml-22':'ml-0'}`}
           />
           <span
             className={`text-xl font-bold text-[#4ade80] transition-opacity duration-300 ${
