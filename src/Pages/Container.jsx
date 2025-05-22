@@ -44,16 +44,13 @@ const Container = ({ data }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
         <div className="space-y-2">
-          <h1
-            className="text-3xl font-bold"
-            style={{ color: "#4ade80" }}
-          >
+          <h1 className="text-3xl font-bold" style={{ color: "#51FA15" }}>
             Welcome, {user.firstname} 👋
           </h1>
           <div className="flex items-center gap-3">
             <span
               className="text-sm font-semibold px-2 py-1 rounded-xl"
-              style={{ backgroundColor: "#2a2b3a", color: "#4ade80" }}
+              style={{ backgroundColor: "#151515", color: "#51FA15" }}
             >
               Level {user.level}
             </span>
@@ -63,13 +60,13 @@ const Container = ({ data }) => {
           </div>
           <div
             className="mt-2 w-full rounded-full h-3"
-            style={{ backgroundColor: "#2a2b3a" }}
+            style={{ backgroundColor: "#151515" }}
           >
             <div
               className="h-3 rounded-full transition-all duration-300"
               style={{
                 width: `${progressPercent}%`,
-                background: "linear-gradient(90deg, #38bdf8, #4ade80)",
+                background: "#51FA15",
               }}
             />
           </div>
@@ -80,13 +77,13 @@ const Container = ({ data }) => {
 
         <div
           className="flex items-center gap-4 mt-6 md:mt-0 p-2 rounded-full shadow-md"
-          style={{ backgroundColor: "#2a2b3a" }}
+          style={{ backgroundColor: "#151515" }}
         >
           <img
             src={user.avatar}
             alt="Profile"
             className="w-12 h-12 rounded-full object-cover border-2"
-            style={{ borderColor: "#38bdf8" }}
+            style={{ borderColor: "#51FA15" }}
           />
           <div>
             <p style={{ color: "#f4f4f5", fontWeight: "600" }}>
@@ -100,7 +97,7 @@ const Container = ({ data }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Today's Tasks Card */}
         <Card>
-          <SectionHeader icon={<CheckCircle style={{ color: "#4ade80" }} />} title="Today's Tasks" />
+          <SectionHeader icon={<CheckCircle style={{ color: "#51FA15" }} />} title="Today's Tasks" />
           <div className="flex flex-col justify-between h-full">
             {todaysTasks.length > 0 ? (
               <ul className="space-y-3 mb-4">
@@ -109,8 +106,8 @@ const Container = ({ data }) => {
                     key={i}
                     className="p-3 rounded-xl hover:cursor-pointer transition"
                     style={{
-                      backgroundColor: "#2a2b3a",
-                      color: "#38bdf8",
+                      backgroundColor: "#151515",
+                      color: "#51FA15",
                     }}
                   >
                     <h3 className="font-semibold text-sm">{task.title}</h3>
@@ -128,7 +125,7 @@ const Container = ({ data }) => {
             )}
             <button
               className="text-sm hover:underline"
-              style={{ color: "#38bdf8" }}
+              style={{ color: "#51FA15" }}
             >
               View All Tasks
             </button>
@@ -137,21 +134,21 @@ const Container = ({ data }) => {
 
         {/* Achievements Card */}
         <Card>
-          <SectionHeader icon={<Trophy style={{ color: "#facc15" }} />} title="Achievements" />
+          <SectionHeader icon={<Trophy style={{ color: "#51FA15" }} />} title="Achievements" />
           <div className="flex flex-col gap-4 mt-2">
             <StatItem label="Badges Earned" value={user.badges.length} />
             <StatItem label="Streak" value={`${user.streak.current} days`} />
             <StatItem
               label="Daily Challenge"
               value={user.dailyChallengeCompleted ? "Completed" : "Incomplete"}
-              color={user.dailyChallengeCompleted ? "#4ade80" : "#f43f5e"}
+              color={user.dailyChallengeCompleted ? "#51FA15" : "#f43f5e"}
             />
           </div>
         </Card>
 
         {/* Leaderboard Card */}
         <Card>
-          <SectionHeader icon={<Users style={{ color: "#38bdf8" }} />} title="Leaderboard" />
+          <SectionHeader icon={<Users style={{ color: "#51FA15" }} />} title="Leaderboard" />
           <ul className="space-y-4 mt-2">
             <LeaderboardItem position="🥇" name="Jamie" points="3200 XP" />
             <LeaderboardItem position="🥈" name="Alex" points="2800 XP" />
@@ -170,25 +167,22 @@ const Container = ({ data }) => {
 const Card = ({ children }) => (
   <div
     className="rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all"
-    style={{ backgroundColor: "#2a2b3a" }}
+    style={{ backgroundColor: "#1a1a1a" }}
   >
     {children}
   </div>
 );
 
 const SectionHeader = ({ icon, title }) => (
-  <h2
-    className="text-xl font-bold flex items-center gap-2 mb-4"
-    style={{ color: "#f4f4f5" }}
-  >
+  <h2 className="text-xl font-bold flex items-center gap-2 mb-4" style={{ color: "#f4f4f5" }}>
     {icon} {title}
   </h2>
 );
 
-const StatItem = ({ label, value, color = "#f4f4f5" }) => (
+const StatItem = ({ label, value, color = "#51FA15" }) => (
   <div
     className="flex justify-between items-center p-3 rounded-xl shadow-sm"
-    style={{ backgroundColor: "#1e1f29" }}
+    style={{ backgroundColor: "#121212" }}
   >
     <span className="text-sm" style={{ color: "#a1a1aa" }}>
       {label}
@@ -203,11 +197,15 @@ const LeaderboardItem = ({ position, name, points }) => (
   <li
     className="flex justify-between items-center p-3 rounded-xl hover:cursor-pointer transition"
     style={{
-      backgroundColor: "#2a2b3a",
+      backgroundColor: "#151515",
       color: "#f4f4f5",
     }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(74, 222, 128, 0.1)")}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2a2b3a")}
+    onMouseEnter={(e) =>
+      (e.currentTarget.style.backgroundColor = "rgba(81, 250, 21, 0.1)")
+    }
+    onMouseLeave={(e) =>
+      (e.currentTarget.style.backgroundColor = "#151515")
+    }
   >
     <div className="flex items-center gap-2 font-medium">
       <span className="text-xl">{position}</span>
