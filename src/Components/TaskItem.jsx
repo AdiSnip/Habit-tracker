@@ -17,7 +17,7 @@ const TaskItem = ({ task, onToggle, onDelete, onEdit }) => (
         </h3>
         <p className="text-sm text-gray-600">{task.description}</p>
         <p className="text-xs text-gray-500 mt-1">
-          📅 {task.dueDate || 'No deadline'} | 🎯 {task.priority}
+          📅 {task.dueDate.slice(0,10) || 'No deadline'} | 🎯 {task.priority}
         </p>
       </div>
     </div>
