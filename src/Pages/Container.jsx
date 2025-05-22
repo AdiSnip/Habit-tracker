@@ -166,8 +166,8 @@ const Container = ({ data }) => {
 
 const Card = ({ children }) => (
   <div
-    className="rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all"
-    style={{ backgroundColor: "#1a1a1a" }}
+    className="rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all border border-[#51FA15]"
+    style={{ backgroundColor: "black" }}
   >
     {children}
   </div>
