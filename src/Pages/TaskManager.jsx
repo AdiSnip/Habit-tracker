@@ -48,6 +48,9 @@ const TaskManager = () => {
     const updated = { ...task, isCompleted: !task.isCompleted };
     setTasks(tasks.map(t => t._id === id ? updated : t));
     await axios.patch(`/api/updatetask/${id}`, { isCompleted: updated.isCompleted });
+    await axios.patch(`/api/updateuser`, {
+      xp: !task.isCompleted ? task.xp + 30 : task.xp,
+    });
   };
 
   const handleDeleteTask = async (id) => {

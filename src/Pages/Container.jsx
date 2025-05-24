@@ -4,6 +4,7 @@ import axios from "axios";
 
 const Container = ({ data }) => {
   const [tasks, setTasks] = useState([]);
+  const [progressPercent, setProgressPercent] = useState()
   const user = data?.[0];
 
   useEffect(() => {
@@ -12,8 +13,36 @@ const Container = ({ data }) => {
         .get("/api/readtask")
         .then((res) => setTasks(res.data.tasks || []))
         .catch((err) => console.error("Failed to fetch tasks:", err));
+        setProgressPercent(
+          ((user.xp / user.limitxp) * 100).toFixed(0)
+        );
     }
   }, [user]);
+
+  useEffect(() => {
+    if (progressPercent === 100) {
+      function handleLevelUp() {
+        const newLevel = user.level + 1;
+        const newLimitXp = user.limitxp * 2; // Example: double the limit XP for the next level
+        const newXp = 0; // Reset XP after leveling up
+
+        axios
+          .put("/api/updateuser", {
+            id: user._id,
+            level: newLevel,
+            limitxp: newLimitXp,
+            xp: newXp,
+          })
+          .then(() => {
+            console.log("User leveled up!");
+          })
+          .catch((err) => console.error("Failed to update user:", err));
+      }
+      handleLevelUp();
+    }
+  
+  }, [progressPercent]);
+  
 
   if (!user)
     return (
@@ -22,7 +51,6 @@ const Container = ({ data }) => {
       </div>
     );
 
-  const progressPercent = ((user.xp % 1000) / 10).toFixed(2);
 
   const isToday = (dateString) => {
     const taskDate = new Date(dateString);
@@ -55,7 +83,7 @@ const Container = ({ data }) => {
               Level {user.level}
             </span>
             <span className="text-sm" style={{ color: "#a1a1aa" }}>
-              {user.xp} XP
+              {user.xp}/{user.limitxp} XP
             </span>
           </div>
           <div

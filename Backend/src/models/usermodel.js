@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 
   xp:       { type: Number, default: 0 },
+  limitxp:   { type: Number, default: 100 },
   level:    { type: Number, default: 1 },
   badges:   [{ type: String, default: {} }],
 

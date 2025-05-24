@@ -1,6 +1,15 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 
+const app = express();
+
+// ===== Middleware =====
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static('public'));
+
+
 // Route imports
 import register from './routes/createuser.route.js';
 import userdata from './routes/getuser.route.js';
@@ -10,14 +19,8 @@ import createTaskRoute from './routes/Create/createTask.route.js';
 import readTaskRoute from './routes/Read/Taskread.route.js';
 import deletetaskrouter from './routes/Delete/deletetask.route.js';
 import updatetask from './routes/Update/updatetask.route.js';
+import updateuser from './routes/Update/updateuser.route.js';
 
-const app = express();
-
-// ===== Middleware =====
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(express.static('public'));
 
 // ===== API Routes =====
 app.use('/api/register', register);
@@ -28,5 +31,6 @@ app.use('/api/createtask', createTaskRoute);
 app.use('/api/readtask', readTaskRoute);
 app.use('/api/deletetask', deletetaskrouter); // use router logic inside route file
 app.use('/api/updatetask', updatetask)
+app.use('/api/updateuser', updateuser); // use router logic inside route file
 
 export default app;
