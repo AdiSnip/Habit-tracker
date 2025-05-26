@@ -3,33 +3,31 @@ import React, { useEffect, useRef, useState } from 'react';
 import TaskForm from '../Components/TaskForm.jsx';
 import TaskItem from '../Components/TaskItem.jsx';
 
-const TaskManager = ({getData}) => {
+const TaskManager = ({ getData }) => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [filter, setFilter] = useState('all');
-  const [user, setUser] = useState()
+  const [user, setUser] = useState();
 
   const titleRef = useRef();
   const dueDateRef = useRef();
   const descRef = useRef();
   const priorityRef = useRef();
 
-useEffect(() => {
-  axios.get('/api/readtask')
-    .then(res => setTasks(res.data.tasks))
-    .catch(err => console.error('Fetch error:', err));
+  useEffect(() => {
+    axios.get('/api/readtask')
+      .then(res => setTasks(res.data.tasks))
+      .catch(err => console.error('Fetch error:', err));
 
-  if (Array.isArray(getData) && getData.length > 0) {
-    setUser(getData[0]); // force to single user object
-  } else if (getData) {
-    setUser(getData);
-  } else {
-    setUser(null); // fallback
-  }
-}, [getData]);
-
-
+    if (Array.isArray(getData) && getData.length > 0) {
+      setUser(getData[0]); // force to single user object
+    } else if (getData) {
+      setUser(getData);
+    } else {
+      setUser(null); // fallback
+    }
+  }, [getData]);
 
   const handleAddTask = async (e) => {
     e.preventDefault();
@@ -45,7 +43,8 @@ useEffect(() => {
     try {
       const res = await axios.post('/api/createtask', newTask);
       if (res.data.success) {
-        setTasks([...tasks, res.data.task]);
+        // Put new task at the top
+        setTasks(prevTasks => [res.data.task, ...prevTasks]);
         e.target.reset();
         setShowForm(false);
       }
@@ -54,78 +53,72 @@ useEffect(() => {
     }
   };
 
-const handleToggleTask = async (id) => {
-  const task = tasks.find(t => t._id === id);
-  if (!task) return;
+  const handleToggleTask = async (id) => {
+    const task = tasks.find(t => t._id === id);
+    if (!task) return;
 
-  const willBeCompleted = !task.isCompleted;
-  const updatedTask = { ...task, isCompleted: willBeCompleted };
+    const willBeCompleted = !task.isCompleted;
+    const updatedTask = { ...task, isCompleted: willBeCompleted };
 
-  // Optimistic UI update
-  setTasks(prev =>
-    prev.map(t => t._id === id ? updatedTask : t)
-  );
-
-  try {
-    await axios.patch(`/api/updatetask/${id}`, { isCompleted: willBeCompleted }, { withCredentials: true });
-
-    if (willBeCompleted) {
-      const xpGain = 30;
-
-      // Access the actual user data (assuming user is an array with 1 object)
-const actualUser = Array.isArray(user) ? user[0] : user;
-
-if (!actualUser) {
-  console.error("User data not available");
-  return;
-}
-
-const currentXP = Number(actualUser.xp);
-let limitxp = Number(actualUser.limitxp);
-let level = Number(actualUser.level);
-
-if ([currentXP, limitxp, level].some(val => isNaN(val))) {
-  console.error("Invalid user XP data:", actualUser);
-  return;
-}
-
-
-      let newXP = currentXP + xpGain;
-
-      if (newXP >= limitxp) {
-        newXP -= limitxp;
-        level += 1;
-        limitxp += 50;
-      }
-
-      // Update user XP using PATCH with credentials
-      const res = await axios.patch('/api/updateuser/xp', {
-        xp: newXP,
-        limitxp,
-        level,
-      }, { withCredentials: true });
-
-      if (res.data.success) {
-        // Optionally update user state if you want to reflect new XP immediately
-        setUser([res.data.user]);
-      }
-
-      console.log('XP updated:', newXP);
-    }
-  } catch (error) {
-    console.error("Task toggle failed:", error);
-
-    // Rollback UI change on failure
+    // Optimistic UI update
     setTasks(prev =>
-      prev.map(t => t._id === id ? task : t)
+      prev.map(t => t._id === id ? updatedTask : t)
     );
-  }
-};
 
+    try {
+      await axios.patch(`/api/updatetask/${id}`, { isCompleted: willBeCompleted }, { withCredentials: true });
 
+      if (willBeCompleted) {
+        const xpGain = 30;
 
+        // Access the actual user data (assuming user is an array with 1 object)
+        const actualUser = Array.isArray(user) ? user[0] : user;
 
+        if (!actualUser) {
+          console.error("User data not available");
+          return;
+        }
 
+        const currentXP = Number(actualUser.xp);
+        let limitxp = Number(actualUser.limitxp);
+        let level = Number(actualUser.level);
+
+        if ([currentXP, limitxp, level].some(val => isNaN(val))) {
+          console.error("Invalid user XP data:", actualUser);
+          return;
+        }
+
+        let newXP = currentXP + xpGain;
+
+        if (newXP >= limitxp) {
+          newXP -= limitxp;
+          level += 1;
+          limitxp += 50;
+        }
+
+        // Update user XP using PATCH with credentials
+        const res = await axios.patch('/api/updateuser/xp', {
+          xp: newXP,
+          limitxp,
+          level,
+        }, { withCredentials: true });
+
+        if (res.data.success) {
+          // Optionally update user state if you want to reflect new XP immediately
+          setUser([res.data.user]);
+        }
+
+        console.log('XP updated:', newXP);
+      }
+    } catch (error) {
+      console.error("Task toggle failed:", error);
+
+      // Rollback UI change on failure
+      setTasks(prev =>
+        prev.map(t => t._id === id ? task : t)
+      );
+    }
+  };
 
   const handleDeleteTask = async (id) => {
     const confirmed = window.confirm('Are you sure you want to delete this task?');
@@ -170,13 +163,19 @@ if ([currentXP, limitxp, level].some(val => isNaN(val))) {
     }, 0);
   };
 
-  const filteredTasks = tasks
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-    .filter(task => {
-      if (filter === 'completed') return task.isCompleted;
-      if (filter === 'incomplete') return !task.isCompleted;
-      return true;
-    });
+const filteredTasks = tasks
+  .filter(task => {
+    if (filter === 'completed') return task.isCompleted;
+    if (filter === 'incomplete') return !task.isCompleted;
+    return true;
+  })
+  .sort((a, b) => {
+    if (a.isCompleted !== b.isCompleted) {
+      return a.isCompleted ? 1 : -1;
+    }
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+
 
   const totalCompleted = tasks.filter(t => t.isCompleted).length;
   const totalIncomplete = tasks.filter(t => !t.isCompleted).length;
