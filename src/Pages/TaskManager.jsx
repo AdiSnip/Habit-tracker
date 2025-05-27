@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TaskForm from '../Components/TaskForm.jsx';
 import TaskItem from '../Components/TaskItem.jsx';
 
-const TaskManager = ({ getData, refetch }) => {
+const TaskManager = ({ getData,refetch }) => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
