@@ -1,9 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import TaskForm from '../Components/TaskForm.jsx';
 import TaskItem from '../Components/TaskItem.jsx';
 
-const TaskManager = ({ getData }) => {
+const TaskManager = ({ getData, refetch }) => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -21,11 +22,11 @@ const TaskManager = ({ getData }) => {
       .catch(err => console.error('Fetch error:', err));
 
     if (Array.isArray(getData) && getData.length > 0) {
-      setUser(getData[0]); // force to single user object
+      setUser(getData[0]);
     } else if (getData) {
       setUser(getData);
     } else {
-      setUser(null); // fallback
+      setUser(null);
     }
   }, [getData]);
 
@@ -43,7 +44,6 @@ const TaskManager = ({ getData }) => {
     try {
       const res = await axios.post('/api/createtask', newTask);
       if (res.data.success) {
-        // Put new task at the top
         setTasks(prevTasks => [res.data.task, ...prevTasks]);
         e.target.reset();
         setShowForm(false);
@@ -60,69 +60,37 @@ const TaskManager = ({ getData }) => {
     const willBeCompleted = !task.isCompleted;
     const updatedTask = { ...task, isCompleted: willBeCompleted };
 
-    // Optimistic UI update
-    setTasks(prev =>
-      prev.map(t => t._id === id ? updatedTask : t)
-    );
+    setTasks(prev => prev.map(t => t._id === id ? updatedTask : t));
 
     try {
       await axios.patch(`/api/updatetask/${id}`, { isCompleted: willBeCompleted }, { withCredentials: true });
 
       if (willBeCompleted) {
         const xpGain = 30;
-
-        // Access the actual user data (assuming user is an array with 1 object)
         const actualUser = Array.isArray(user) ? user[0] : user;
 
-        if (!actualUser) {
-          console.error("User data not available");
-          return;
-        }
+        if (!actualUser) return;
 
-        const currentXP = Number(actualUser.xp);
-        let limitxp = Number(actualUser.limitxp);
-        let level = Number(actualUser.level);
-
-        if ([currentXP, limitxp, level].some(val => isNaN(val))) {
-          console.error("Invalid user XP data:", actualUser);
-          return;
-        }
-
-        let newXP = currentXP + xpGain;
+        let { xp, limitxp, level } = actualUser;
+        let newXP = Number(xp) + xpGain;
 
         if (newXP >= limitxp) {
           newXP -= limitxp;
           level += 1;
           limitxp += 50;
         }
-
-        // Update user XP using PATCH with credentials
-        const res = await axios.patch('/api/updateuser/xp', {
-          xp: newXP,
-          limitxp,
-          level,
-        }, { withCredentials: true });
-
-        if (res.data.success) {
-          // Optionally update user state if you want to reflect new XP immediately
-          setUser([res.data.user]);
-        }
-
-        console.log('XP updated:', newXP);
+        refetch();
+        const res = await axios.patch('/api/updateuser/xp', { xp: newXP, limitxp, level }, { withCredentials: true });
+        if (res.data.success) setUser([res.data.user]);
       }
     } catch (error) {
-      console.error("Task toggle failed:", error);
-
-      // Rollback UI change on failure
-      setTasks(prev =>
-        prev.map(t => t._id === id ? task : t)
-      );
+      console.error("Toggle failed:", error);
+      setTasks(prev => prev.map(t => t._id === id ? task : t));
     }
   };
 
   const handleDeleteTask = async (id) => {
-    const confirmed = window.confirm('Are you sure you want to delete this task?');
-    if (!confirmed) return;
+    if (!window.confirm('Delete this task?')) return;
 
     try {
       await axios.delete(`/api/deletetask/${id}`);
@@ -163,19 +131,16 @@ const TaskManager = ({ getData }) => {
     }, 0);
   };
 
-const filteredTasks = tasks
-  .filter(task => {
-    if (filter === 'completed') return task.isCompleted;
-    if (filter === 'incomplete') return !task.isCompleted;
-    return true;
-  })
-  .sort((a, b) => {
-    if (a.isCompleted !== b.isCompleted) {
-      return a.isCompleted ? 1 : -1;
-    }
-    return new Date(a.dueDate) - new Date(b.dueDate);
-  });
-
+  const filteredTasks = tasks
+    .filter(task => {
+      if (filter === 'completed') return task.isCompleted;
+      if (filter === 'incomplete') return !task.isCompleted;
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    });
 
   const totalCompleted = tasks.filter(t => t.isCompleted).length;
   const totalIncomplete = tasks.filter(t => !t.isCompleted).length;
@@ -188,12 +153,26 @@ const filteredTasks = tasks
   };
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-gradient-to-br from-black via-indigo-950 to-black p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-indigo-950 rounded-xl shadow-2xl p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-indigo-950 rounded-xl shadow-2xl p-6"
+        >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-indigo-500">🎮 Task Arena</h1>
-            <button
+            <motion.h1
+              className="text-3xl font-bold text-indigo-400"
+              initial={{ x: -100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              🎮 Task Arena
+            </motion.h1>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 setShowForm(!showForm);
                 setEditingTask(null);
@@ -201,55 +180,79 @@ const filteredTasks = tasks
               className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
             >
               {showForm ? '❌ Cancel' : '+ New Quest'}
-            </button>
+            </motion.button>
           </div>
 
-          {(showForm || editingTask) && (
-            <TaskForm
-              onSubmit={editingTask ? handleUpdateTask : handleAddTask}
-              refs={{ titleRef, dueDateRef, descRef, priorityRef }}
-              isEdit={!!editingTask}
-            />
-          )}
+          <AnimatePresence>
+            {(showForm || editingTask) && (
+              <motion.div
+                key="task-form"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <TaskForm
+                  onSubmit={editingTask ? handleUpdateTask : handleAddTask}
+                  refs={{ titleRef, dueDateRef, descRef, priorityRef }}
+                  isEdit={!!editingTask}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Filter Bar */}
           <div className="sticky top-0 z-10 bg-indigo-950 py-3 mb-4 border-b border-gray-200 flex gap-4">
             {['all', 'completed', 'incomplete'].map(option => (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded font-medium ${
                   filter === option ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700'
                 } hover:bg-indigo-400 hover:text-white transition`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          {/* Task Stats */}
-          <div className="mb-4 text-sm text-gray-600">
-            <span>✅ Completed: {totalCompleted} </span> | 
-            <span> 📌 Incomplete: {totalIncomplete}</span>
+          <div className="mb-4 text-sm text-gray-300">
+            ✅ Completed: {totalCompleted} | 📌 Incomplete: {totalIncomplete}
           </div>
 
-          {/* Task List */}
           <div className="space-y-4">
-            {filteredTasks.map(task => (
-              <div key={task._id} className={isDueSoon(task.dueDate) ? 'border-l-4 border-yellow-400 pl-2' : ''}>
-                <TaskItem
-                  task={task}
-                  onToggle={() => handleToggleTask(task._id)}
-                  onDelete={() => handleDeleteTask(task._id)}
-                  onEdit={() => startEditing(task)}
-                />
-              </div>
-            ))}
+            <AnimatePresence>
+              {filteredTasks.map(task => (
+                <motion.div
+                  key={task._id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className={isDueSoon(task.dueDate) ? 'border-l-4 border-yellow-400 pl-2' : ''}
+                >
+                  <TaskItem
+                    task={task}
+                    onToggle={() => handleToggleTask(task._id)}
+                    onDelete={() => handleDeleteTask(task._id)}
+                    onEdit={() => startEditing(task)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
             {filteredTasks.length === 0 && (
-              <p className="text-gray-500 text-center">No tasks found in this section.</p>
+              <motion.p
+                className="text-gray-500 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                No tasks found in this section.
+              </motion.p>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

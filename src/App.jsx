@@ -51,7 +51,7 @@ function getData(){
           <Route path="/" element={<Container data={userdata}/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/task" element={<TaskManager getData={userdata}/>} />
+          <Route path="/task" element={<TaskManager getData={userdata} refetch={getData}/>} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings data={userdata}/>} />
         </Routes>
