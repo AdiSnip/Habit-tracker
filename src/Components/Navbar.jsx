@@ -20,7 +20,7 @@ const Navbar = () => {
   const items = [
     { icon: <MdDashboard size={24} />, label: "Dashboard", href: "/" },
     { icon: <FaTasks size={22} />, label: "Tasks", href: "/Task" },
-    { icon: <MdAnalytics size={24} />, label: "Analytics", href: "/analytics" },
+    // { icon: <MdAnalytics size={24} />, label: "Analytics", href: "/analytics" },
   ];
 
   return (

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TaskForm from '../Components/TaskForm.jsx';
 import TaskItem from '../Components/TaskItem.jsx';
 
-const TaskManager = ({ getData,refetch }) => {
+const TaskManager = ({ getData, refetch }) => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -153,17 +153,17 @@ const TaskManager = ({ getData,refetch }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-indigo-950 to-black p-6">
+    <div className="min-h-screen bg-gradient-to-br from-black via-indigo-950 to-black p-2 sm:p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-indigo-950 rounded-xl shadow-2xl p-6"
+          className="bg-indigo-950 rounded-xl shadow-2xl p-3 sm:p-6"
         >
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 md:mb-6 gap-2">
             <motion.h1
-              className="text-3xl font-bold text-indigo-400"
+              className="text-2xl sm:text-3xl font-bold text-indigo-400 text-center sm:text-left"
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.6 }}
@@ -177,7 +177,7 @@ const TaskManager = ({ getData,refetch }) => {
                 setShowForm(!showForm);
                 setEditingTask(null);
               }}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+              className="bg-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded text-sm sm:text-base hover:bg-indigo-700 transition w-full sm:w-auto"
             >
               {showForm ? '❌ Cancel' : '+ New Quest'}
             </motion.button>
@@ -201,27 +201,27 @@ const TaskManager = ({ getData,refetch }) => {
             )}
           </AnimatePresence>
 
-          <div className="sticky top-0 z-10 bg-indigo-950 py-3 mb-4 border-b border-gray-200 flex gap-4">
+          <div className="sticky top-0 z-10 bg-indigo-950 py-2 sm:py-3 mb-3 sm:mb-4 border-b border-gray-200 flex gap-2 sm:gap-4 overflow-x-auto">
             {['all', 'completed', 'incomplete'].map(option => (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`px-4 py-2 rounded font-medium ${
+                className={`px-3 py-1 sm:px-4 sm:py-2 rounded font-medium text-xs sm:text-base ${
                   filter === option ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700'
-                } hover:bg-indigo-400 hover:text-white transition`}
+                } hover:bg-indigo-400 hover:text-white transition whitespace-nowrap`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
               </motion.button>
             ))}
           </div>
 
-          <div className="mb-4 text-sm text-gray-300">
+          <div className="mb-2 sm:mb-4 text-xs sm:text-sm text-gray-300 text-center sm:text-left">
             ✅ Completed: {totalCompleted} | 📌 Incomplete: {totalIncomplete}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <AnimatePresence>
               {filteredTasks.map(task => (
                 <motion.div

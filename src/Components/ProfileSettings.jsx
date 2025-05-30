@@ -4,7 +4,7 @@ import { FaUserCircle } from 'react-icons/fa';
 const ProfileSettings = ({data}) => {
   if(!data) return
   return (
-    <section className="flex flex-col md:flex-row items-center gap-6 bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition">
+    <section className="flex flex-col md:flex-row items-center gap-6 bg-black hover:bg-white border hover:text-black p-6 rounded-xl shadow-sm hover:shadow-md transition">
       <FaUserCircle className="text-6xl text-blue-600" />
       <div className="text-center md:text-left">
         <h2 className="text-2xl font-semibold">{data[0].firstname + ' ' + data[0].lastname}</h2>

@@ -3,7 +3,7 @@ import { FiLock } from 'react-icons/fi';
 
 const PrivacySettings = () => {
   return (
-    <div className="flex items-center gap-4 p-6 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+    <div className="flex items-center gap-4 p-6 border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-black cursor-pointer transition">
       <FiLock className="text-3xl text-purple-500" />
       <div>
         <h3 className="text-lg font-medium">Privacy & Password</h3>

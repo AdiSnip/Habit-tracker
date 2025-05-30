@@ -101,84 +101,83 @@ const Container = ({ data }) => {
   }
 
   const isToday = (dateString) => {
+    if (!dateString) return false;
     const taskDate = new Date(dateString);
     const today = new Date();
-    taskDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    return taskDate.getTime() === today.getTime();
+    return (
+      taskDate.getDate() === today.getDate() &&
+      taskDate.getMonth() === today.getMonth() &&
+      taskDate.getFullYear() === today.getFullYear()
+    );
   };
 
-  const todaysTasks = tasks.filter(
-    (task) => isToday(task.dueDate) && !task.isCompleted
-  );
+  const todaysTasks = tasks.filter((task) => {
+    return isToday(task.dueDate) && !task.isCompleted;
+  });
 
   return (
-    <div className="min-h-screen p-6 bg-black text-gray-100">
-      {/* Header */}
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen p-4 sm:p-6 md:p-8 bg-gradient-to-br from-black via-gray-900 to-black text-gray-100"
+    >
       <motion.header
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10"
-        aria-label="User dashboard header"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-10 backdrop-blur-lg bg-black/30 p-4 sm:p-6 md:p-8 rounded-2xl border border-lime-400/20"
       >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-lime-400">
+        <div className="space-y-3 md:space-y-4 w-full lg:w-auto">
+          <motion.h1 
+            initial={{ x: -20 }}
+            animate={{ x: 0 }}
+            className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-lime-400 to-green-500 bg-clip-text text-transparent"
+          >
             Welcome, {user.firstname} 👋
-          </h1>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold px-2 py-1 rounded-xl bg-gray-900 text-lime-400">
+          </motion.h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gray-900/50 text-lime-400 border border-lime-400/20">
               Level {user.level}
             </span>
-            <span className="text-sm text-gray-400">
+            <span className="text-xs sm:text-sm text-gray-300 bg-gray-900/30 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl">
               {user.xp}/{user.limitxp} XP
             </span>
           </div>
 
-          <div className="mt-2 w-full rounded-full h-3 bg-gray-900">
+          <div className="mt-2 md:mt-4 w-full max-w-md rounded-full h-3 md:h-4 bg-gray-900/50 backdrop-blur-sm p-0.5">
             <motion.div
-              className="h-3 rounded-full bg-lime-400"
+              className="h-full rounded-full bg-gradient-to-r from-lime-400 to-green-500 shadow-[0_0_15px] shadow-lime-500/50"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.6 }}
-              aria-valuenow={progressPercent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              role="progressbar"
+              transition={{ duration: 0.8 }}
             />
           </div>
-
-          <p className="text-xs mt-1 text-gray-400">Progress to next level</p>
         </div>
 
-        <div
-          className="flex items-center gap-4 mt-6 md:mt-0 p-2 rounded-full shadow-md bg-gray-900"
-          aria-label="User profile"
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center gap-4 mt-4 lg:mt-0 p-3 sm:p-4 rounded-2xl bg-gray-900/50 backdrop-blur-sm border border-lime-400/20 hover:border-lime-400/40 transition-all duration-300 w-full lg:w-auto"
         >
           <img
             src={user.avatar}
             alt={`${user.firstname} avatar`}
-            className="w-12 h-12 rounded-full object-cover border-2 border-lime-400"
+            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-lime-400 shadow-lg shadow-lime-400/20"
             loading="lazy"
           />
           <div>
-            <p className="text-gray-100 font-semibold">{user.username}</p>
+            <p className="text-base sm:text-lg text-gray-100 font-semibold">{user.username}</p>
           </div>
-        </div>
+        </motion.div>
       </motion.header>
 
-      {/* Grid Section */}
       <motion.section
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        initial="hidden"
-        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
         variants={{
           hidden: {},
-          visible: {
-            transition: { staggerChildren: 0.2 },
-          },
+          visible: { transition: { staggerChildren: 0.15 } }
         }}
-        aria-label="User statistics and tasks"
+        initial="hidden"
+        animate="visible"
       >
         <AnimatedCard>
           <SectionHeader
@@ -251,17 +250,14 @@ const Container = ({ data }) => {
           </ul>
         </AnimatedCard>
       </motion.section>
-
-      <p className="text-center text-xs mt-10 italic text-gray-400">
-        “Consistency beats intensity.” 🚀
-      </p>
-    </div>
+    </motion.div>
   );
 };
 
-const Card = ({ children }) => (
-  <div className="rounded-3xl shadow-xl p-6 border border-lime-400 bg-black">
-    {children}
+const SectionHeader = ({ icon, title }) => (
+  <div className="flex items-center gap-3 mb-6">
+    <span className="text-2xl">{icon}</span>
+    <h2 className="text-xl font-bold text-gray-100">{title}</h2>
   </div>
 );
 
@@ -269,40 +265,42 @@ const AnimatedCard = ({ children }) => (
   <motion.div
     variants={{
       hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0 },
+      visible: { opacity: 1, y: 0 }
     }}
   >
     <Card>{children}</Card>
   </motion.div>
 );
 
-const SectionHeader = ({ icon, title }) => (
-  <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-gray-100">
-    {icon} {title}
-  </h2>
-);
-
-const StatItem = ({ label, value, color = "#51FA15" }) => (
-  <div className="flex justify-between items-center p-3 rounded-xl shadow-sm bg-gray-900">
-    <span className="text-sm text-gray-400">{label}</span>
-    <span className="font-semibold" style={{ color }}>
-      {value}
-    </span>
+const Card = ({ children }) => (
+  <div className="rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 border border-lime-400/20 bg-gray-900/30 backdrop-blur-lg hover:border-lime-400/40 transition-all duration-300">
+    {children}
   </div>
 );
 
-const LeaderboardItem = ({ position, name, points }) => (
-  <li
-    className="flex justify-between items-center p-3 rounded-xl transition bg-gray-900 text-gray-100 hover:bg-lime-100 hover:bg-opacity-10 cursor-pointer"
-    tabIndex={0}
-    aria-label={`${position} place: ${name}, Points: ${points}`}
+const StatItem = ({ label, value, color = "#51FA15" }) => (
+  <motion.div 
+    whileHover={{ scale: 1.02 }}
+    className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gray-900/50 border border-lime-400/10 hover:border-lime-400/30 transition-all duration-300"
   >
-    <div className="flex items-center gap-2 font-medium">
-      <span className="text-xl">{position}</span>
-      <span>{name}</span>
+    <span className="text-xs sm:text-sm text-gray-300">{label}</span>
+    <span className="text-sm sm:text-base font-semibold" style={{ color }}>
+      {value}
+    </span>
+  </motion.div>
+);
+
+const LeaderboardItem = ({ position, name, points }) => (
+  <motion.li
+    whileHover={{ scale: 1.02 }}
+    className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gray-900/50 border border-lime-400/10 hover:border-lime-400/30 text-gray-100 transition-all duration-300"
+  >
+    <div className="flex items-center gap-2 sm:gap-3 font-medium">
+      <span className="text-xl sm:text-2xl">{position}</span>
+      <span className="text-sm sm:text-base text-gray-200">{name}</span>
     </div>
-    <span className="text-sm text-gray-400">{points}</span>
-  </li>
+    <span className="text-xs sm:text-sm font-semibold text-lime-400">{points}</span>
+  </motion.li>
 );
 
 export default Container;
